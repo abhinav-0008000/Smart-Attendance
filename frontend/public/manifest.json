@@ -12,7 +12,7 @@
   "background_color": "#001a33",
   "theme_color": "#003366",
   "categories": ["education", "productivity", "utilities"],
-  "iarc_rating_id": "99-999-999",
+  "iarc_rating_id": "e58c-4f7f-8561-123456789012",
   "prefer_related_applications": false,
   "related_applications": [
     {
@@ -38,16 +38,16 @@
   "screenshots": [
     {
       "src": "college-logo.png",
-      "sizes": "any",
+      "sizes": "1920x1080",
       "type": "image/png",
-      "label": "Secure Administrative Portal",
+      "label": "Login Screen",
       "form_factor": "narrow"
     },
     {
       "src": "college-logo.png",
-      "sizes": "any",
+      "sizes": "1920x1080",
       "type": "image/png",
-      "label": "Student Dashboard Landscape",
+      "label": "Admin Dashboard",
       "form_factor": "wide"
     }
   ],
@@ -89,10 +89,26 @@
   ],
   "widgets": [
     {
-      "name": "Live Stats",
-      "description": "View real-time attendance status",
-      "tag": "stats",
-      "ms_ac_template": "widget.json"
+      "name": "Attendance Status",
+      "short_name": "Status",
+      "description": "View live attendance stats on your dashboard.",
+      "tag": "attendance_widget",
+      "ms_ac_template": "widget.json",
+      "icons": [
+        {
+          "src": "college-logo.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ],
+      "screenshots": [
+        {
+          "src": "college-logo.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "label": "Live Sync View"
+        }
+      ]
     }
   ],
   "launch_handler": {
@@ -104,7 +120,7 @@
   },
   "scope_extensions": [
     {
-      "origin": "*.netlify.app"
+      "origin": "https://attendance-portal-lendi.netlify.app"
     }
   ],
   "edge_side_panel": {
