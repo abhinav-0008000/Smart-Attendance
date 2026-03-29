@@ -8,13 +8,19 @@
   "start_url": "/auth.html",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#001a33",
   "theme_color": "#003366",
-  "categories": ["education", "productivity"],
-  "iarc_rating_id": "null",
+  "categories": ["education", "productivity", "utilities"],
+  "iarc_rating_id": "00000000-0000-0000-0000-000000000000",
   "prefer_related_applications": false,
-  "related_applications": [],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.lendi_institute.attendance",
+      "id": "com.lendi_institute.attendance"
+    }
+  ],
   "icons": [
     {
       "src": "icon.svg",
@@ -75,5 +81,32 @@
       "url": "/auth.html",
       "description": "Quick access to Student Portal"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/auth.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [],
+  "protocol_handlers": [],
+  "widgets": [],
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "note_taking": {
+    "new_note_url": "/auth.html"
+  },
+  "scope_extensions": [
+    {
+      "origin": "https://attendance-portal-lendi.netlify.app"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
