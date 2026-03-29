@@ -6,16 +6,26 @@
   "lang": "en-US",
   "dir": "ltr",
   "start_url": "/auth.html",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#001a33",
   "theme_color": "#003366",
   "categories": ["education", "productivity"],
+  "iarc_rating_id": "null",
+  "prefer_related_applications": false,
+  "related_applications": [],
   "icons": [
     {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "icon-pwa.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
+      "sizes": "640x640",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {

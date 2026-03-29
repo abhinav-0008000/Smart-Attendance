@@ -8,6 +8,7 @@ const ASSETS = [
   './summary.html',
   './icon-192.png',
   './icon-512.png',
+  './icon.svg',
   './manifest.json'
 ];
 

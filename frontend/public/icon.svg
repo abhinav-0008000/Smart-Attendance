@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#001a33"/>
+  <rect x="0" y="0" width="512" height="512" fill="#001a33"/>
+  <!-- Modern Gear / Shield Motif -->
+  <path d="M256 80 C158.8 80 80 158.8 80 256s78.8 176 176 176 176-78.8 176-176S353.2 80 256 80zm0 320c-79.5 0-144-64.5-144-144s64.5-144 144-144 144 64.5 144 144-64.5 144-144 144z" fill="#ffcc00"/>
+  <circle cx="256" cy="256" r="60" fill="#00ccff">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <path d="M256 160 L256 220 M256 292 L256 352 M160 256 L220 256 M292 256 L352 256" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+</svg>
