@@ -603,8 +603,8 @@
 
     // ATTENDANCE RING ANIMATION
     async function loadAttendanceStats() {
-      const sId = user.sectionId || user.section;
-      if (!sId) return;
+      const sId = user.sectionId || (user.section && typeof user.section === 'object' ? user.section._id : user.section);
+      if (!sId || sId === '[object Object]') return;
       try {
         const res = await fetch(`${API_URL}/attendance/report/${sId}`);
         if(!res.ok) return;
@@ -678,8 +678,8 @@
 
     // Load all ACTIVE SESSION subjects (started by faculty) for this section
     async function loadSubjects() {
-      const sId = user.sectionId || user.section;
-      if (!sId) return;
+      const sId = user.sectionId || (user.section && typeof user.section === 'object' ? user.section._id : user.section);
+      if (!sId || sId === '[object Object]') return;
       const sel = document.getElementById('subjectSelect');
       const noMsg = document.getElementById('noSessionMsg');
       try {
