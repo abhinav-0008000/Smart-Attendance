@@ -323,7 +323,7 @@ router.post('/mark-attendance-face', async (req, res) => {
     let user;
     
     if (type === 'student' || type === 'cr') {
-      user = await Student.findById(userId);
+      user = await Student.findById(userId).populate('sectionId');
     } else {
       user = await User.findById(userId);
     }
@@ -342,12 +342,18 @@ router.post('/mark-attendance-face', async (req, res) => {
     const now = currentTime ? new Date(currentTime) : new Date();
     const today = now.toISOString().split('T')[0];
     
-    // Support both populated and unpopulated section IDs
-    let sId = (type === 'student' || type === 'cr') ? (user.sectionId._id || user.sectionId) : user.section; 
+    // Support both populated and unpopulated section IDs with a safety check
+    let sId = null;
+    if (type === 'student' || type === 'cr') {
+        sId = user.sectionId ? (user.sectionId._id || user.sectionId) : null;
+    } else {
+        sId = user.section;
+    }
+
     const regNum = user.reg || user.registerNumber || user.facultyId || user.adminId;
 
     if (!sId || !regNum) {
-      return res.status(400).json({ message: 'Authorization error: Missing ID or Section.' });
+      return res.status(400).json({ message: 'Authorization error: Profile incomplete (Missing ID/Section).' });
     }
 
     const sectionDoc = await Section.findById(sId);
