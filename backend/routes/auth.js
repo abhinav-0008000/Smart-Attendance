@@ -339,28 +339,30 @@ router.post('/mark-attendance-face', async (req, res) => {
     }
 
     // Face verified, now mark attendance
-    const today = new Date().toISOString().split('T')[0];
-    const sId = (type === 'student' || type === 'cr') ? user.sectionId : user.section; 
+    const now = currentTime ? new Date(currentTime) : new Date();
+    const today = now.toISOString().split('T')[0];
     
-    if (!sId) {
-      return res.status(400).json({ message: 'User not assigned to any section.' });
+    // Support both populated and unpopulated section IDs
+    let sId = (type === 'student' || type === 'cr') ? (user.sectionId._id || user.sectionId) : user.section; 
+    const regNum = user.reg || user.registerNumber || user.facultyId || user.adminId;
+
+    if (!sId || !regNum) {
+      return res.status(400).json({ message: 'Authorization error: Missing ID or Section.' });
     }
 
     const sectionDoc = await Section.findById(sId);
-    if (!sectionDoc) return res.status(404).json({ message: 'Section not found' });
+    if (!sectionDoc) return res.status(404).json({ message: 'Assigned section was not found.' });
 
-    // --- GEOTAGGING CHECK (Square / Rectangle Mode) ---
+    // --- GEOTAGGING CHECK ---
     if (sectionDoc.location && sectionDoc.location.lat && sectionDoc.location.lng) {
       if (!latitude || !longitude) {
-        return res.status(403).json({ message: 'Location access required to mark attendance.' });
+        return res.status(403).json({ message: 'Secure boundary check requires location access.' });
       }
 
       const centerLat = sectionDoc.location.lat;
       const centerLng = sectionDoc.location.lng;
-      // Use saved radius or default to 200m. Adding a 15m "buffer" for GPS inaccuracy.
       const radiusMeters = (sectionDoc.location.radius || 200) + 15; 
 
-      // Approximate degree offsets
       const latOffset = radiusMeters / 111111;
       const lngOffset = radiusMeters / (111111 * Math.cos(centerLat * Math.PI / 180));
 
@@ -371,41 +373,30 @@ router.post('/mark-attendance-face', async (req, res) => {
         longitude >= (centerLng - lngOffset)
       );
 
-      console.log(`[GEO] User: ${latitude}, ${longitude} | Center: ${centerLat}, ${centerLng} | Radius: ${radiusMeters}m | Inside: ${isInside}`);
-
       if (!isInside) {
-          return res.status(403).json({ message: `Outside secure boundary. Your Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)}. Target Center: ${centerLat.toFixed(5)}, ${centerLng.toFixed(5)}` });
+          return res.status(403).json({ message: `Access Denied: Outside secure boundary.` });
       }
     }
 
+    // Time Window Check
     if (sectionDoc.timeWindow && sectionDoc.timeWindow.start && sectionDoc.timeWindow.end) {
       const { start, end } = sectionDoc.timeWindow;
-      const now = currentTime ? new Date(currentTime) : new Date();
-      const currentStr = now.toTimeString().substring(0, 5); // "HH:MM"
+      const currentStr = now.toLocaleTimeString('en-GB', { hour12: false }).substring(0, 5); // 24h format
       
-      let isWithinWindow = false;
-      if (start <= end) {
-        // Standard window (e.g., 09:00 to 17:00)
-        isWithinWindow = (currentStr >= start && currentStr <= end);
-      } else {
-        // Wrap-around window (e.g., 22:00 to 02:00 or 09:00 to 00:00)
-        isWithinWindow = (currentStr >= start || currentStr <= end);
-      }
+      let isWithinWindow = (start <= end) 
+        ? (currentStr >= start && currentStr <= end)
+        : (currentStr >= start || currentStr <= end);
 
       if (!isWithinWindow) {
-        return res.status(403).json({ message: `Attendance window is ${start} to ${end}.` });
+        return res.status(403).json({ message: `Access Denied: Current session window is ${start} to ${end}.` });
       }
     }
 
-
     const sectionName = `Year ${sectionDoc.year} - ${sectionDoc.branchCode} - Sec ${sectionDoc.name}`;
-
-    // Check if attendance record for this section and date exists (and subject if provided)
     const query = { date: today, sectionId: sId };
     if (subjectId) query.subjectId = subjectId;
     
     let attendance = await Attendance.findOne(query);
-    
     if (!attendance) {
       attendance = new Attendance({
         date: today,
@@ -417,18 +408,17 @@ router.post('/mark-attendance-face', async (req, res) => {
       });
     }
 
-    // Check if student already marked
-    const recordIndex = attendance.records.findIndex(r => r.registerNumber === user.reg);
+    const recordIndex = attendance.records.findIndex(r => r.registerNumber === regNum);
     if (recordIndex > -1) {
       attendance.records[recordIndex].status = 'present';
       attendance.records[recordIndex].lat = latitude;
       attendance.records[recordIndex].lng = longitude;
     } else {
-      attendance.records.push({ registerNumber: user.reg, status: 'present', lat: latitude, lng: longitude });
+      attendance.records.push({ registerNumber: regNum, status: 'present', lat: latitude, lng: longitude });
     }
 
     await attendance.save();
-    res.json({ message: 'Attendance marked successfully!' });
+    res.json({ message: 'Self-Attendance marked successfully!' });
 
   } catch (err) {
     console.error('Face Attendance Error:', err);
