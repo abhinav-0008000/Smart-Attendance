@@ -2,20 +2,28 @@ require('dotenv').config();
 require('dns').setDefaultResultOrder('ipv4first');
 const express = require('express');
 const cors = require('cors');
-const db = require('./config/db');
+const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const attendanceRoutes = require('./routes/attendance');
 const adminRoutes = require('./routes/admin');
 const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
-// Using built-in fetch (available in Node 18+)
-// const fetch = require('node-fetch');
 const fs = require('fs');
 
-// MongoDB is already connecting via require('./config/db') above.
-
 const app = express();
+
+// --- DATABASE CONNECTION GUARD (PROD FIX) ---
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("DB GUARD ERROR:", err.message);
+    next();
+  }
+});
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -23,7 +31,8 @@ app.use(cors());
 app.use(express.json());
 
 // Serve frontend
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+const publicPath = path.join(__dirname, '../frontend/public');
+app.use(express.static(publicPath));
 
 app.get('/', (req, res) => {
   res.send('Backend is running!');

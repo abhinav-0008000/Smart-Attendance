@@ -3,23 +3,31 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-console.log('DB_URI:', process.env.DB_URI); 
-
 const dbUri = process.env.DB_URI;
 
 if (!dbUri) {
-  throw new Error('DB_URI is not defined in the environment variables');
+  console.error("CRITICAL ERROR: DB_URI is missing from Netlify Environment Variables!");
 }
 
-mongoose.connect(dbUri)
-  .then(() => {
-    console.log('✔ Connected to MongoDB successfully');
-  })
-  .catch((err) => {
-    console.error('✘ MongoDB connection error:', err.message);
-    // Do not process.exit(1) in serverless!
-  });
+let isConnected = false;
 
-const db = mongoose.connection;
+const connectDB = async () => {
+    mongoose.set('strictQuery', true);
+    if (isConnected) {
+        return;
+    }
 
-module.exports = db;
+    try {
+        const db = await mongoose.connect(dbUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        isConnected = db.connections[0].readyState;
+        console.log('✔ Production Database Connected Successfully');
+    } catch (error) {
+        console.error('✘ Production Database Error:', error.message);
+        throw error;
+    }
+};
+
+module.exports = connectDB;
