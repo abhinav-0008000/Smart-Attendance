@@ -937,7 +937,7 @@
     window.logout = () => { localStorage.clear(); window.location.href = "auth.html"; };
 
     // --- DARK MODE LOGIC ---
-    (function() {
+    document.addEventListener('DOMContentLoaded', () => {
       const themeToggle = document.getElementById('themeToggle');
       const themeCircle = document.getElementById('themeCircle');
       const themeIcon = document.getElementById('themeIcon');
@@ -947,30 +947,33 @@
       body.setAttribute('data-theme', savedTheme);
       updateIcon(savedTheme);
 
-      themeToggle.addEventListener('click', () => {
-        const currentTheme = body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        const rect = themeToggle.getBoundingClientRect();
-        themeCircle.style.top = `${rect.top + rect.height/2}px`;
-        themeCircle.style.left = `${rect.left + rect.width/2}px`;
-        themeCircle.classList.remove('animate');
-        void themeCircle.offsetWidth;
-        themeCircle.classList.add('animate');
-        setTimeout(() => {
-          body.setAttribute('data-theme', newTheme);
-          localStorage.setItem('theme', newTheme);
-          updateIcon(newTheme);
-        }, 400);
-      });
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = body.getAttribute('data-theme');
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          const rect = themeToggle.getBoundingClientRect();
+          themeCircle.style.top = `${rect.top + rect.height/2}px`;
+          themeCircle.style.left = `${rect.left + rect.width/2}px`;
+          themeCircle.classList.remove('animate');
+          void themeCircle.offsetWidth;
+          themeCircle.classList.add('animate');
+          setTimeout(() => {
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+          }, 400);
+        });
+      }
 
       function updateIcon(theme) {
+        if (!themeIcon) return;
         if (theme === 'dark') {
           themeIcon.innerHTML = `<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
         } else {
           themeIcon.innerHTML = `<path d="M12 3v1m0 16v1m9-9h1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path>`;
         }
       }
-    })();
+    });
   </script>
 </body>
 </html>
