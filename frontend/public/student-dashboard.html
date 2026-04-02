@@ -875,24 +875,34 @@
     // Day Attendance Action
     document.getElementById('dailyMarkBtn').onclick = () => {
       isEnrollmentMode = false;
-      window.targetSubjectId = null; // Important: Clear any subject filter
+      window.targetSubjectId = null; 
+      document.getElementById('selectedSubjectDisplay').textContent = 'Targeting: Base Day Attendance';
       openCam(false);
     };
 
-    // Period Attendance Action
+    // Dropdown selection (only updates target, avoids auto-camera)
     document.getElementById('subjectSelect').addEventListener('change', (e) => {
         const subId = e.target.value;
-        if (!subId) return;
-        
-        isEnrollmentMode = false;
+        if (!subId) {
+          window.targetSubjectId = null;
+          document.getElementById('selectedSubjectDisplay').textContent = 'Please choose a subject';
+          return;
+        }
         window.targetSubjectId = subId;
-        
         const sel = e.target;
         const text = sel.options[sel.selectedIndex]?.text || 'No subject selected';
         document.getElementById('selectedSubjectDisplay').textContent = `Targeting: ${text}`;
-        
-        openCam(false);
     });
+
+    // Period Mark Button Action
+    document.getElementById('periodMarkBtn').onclick = () => {
+      if (!window.targetSubjectId) {
+        showToast('Please select a subject from the dropdown to mark period attendance.', 'error');
+        return;
+      }
+      isEnrollmentMode = false;
+      openCam(false);
+    };
 
     document.getElementById('captureBtn').onclick = async () => {
       let lat, lng;
