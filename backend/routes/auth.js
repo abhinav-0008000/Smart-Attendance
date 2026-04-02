@@ -385,10 +385,10 @@ router.post('/mark-attendance-face', async (req, res) => {
       }
     }
 
-    // Time Window Check
+    // Time Window Check (Enforced in IST to prevent UTC drift)
     if (sectionDoc.timeWindow && sectionDoc.timeWindow.start && sectionDoc.timeWindow.end) {
       const { start, end } = sectionDoc.timeWindow;
-      const currentStr = now.toLocaleTimeString('en-GB', { hour12: false }).substring(0, 5); // 24h format
+      const currentStr = now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Kolkata' }).substring(0, 5); // 24h format
       
       let isWithinWindow = (start <= end) 
         ? (currentStr >= start && currentStr <= end)
