@@ -738,7 +738,11 @@
         }
         document.getElementById('noSessionMsg').style.display = 'none';
         sessions.forEach(session => {
-          const opt = new Option(`🟢 ${session.facultyName} - ${session.subjectName}`, session.subjectId);
+          const subjectObj = session.subjectId || {};
+          const subjectName = subjectObj.name || 'Unknown Subject';
+          const facultyName = session.submittedBy || 'Faculty';
+          const validSubId = subjectObj._id || session.subjectId;
+          const opt = new Option(`🟢 ${facultyName} - ${subjectName}`, validSubId);
           sel.add(opt);
         });
         document.getElementById('selectedSubjectDisplay').textContent = 'Please choose a subject';
