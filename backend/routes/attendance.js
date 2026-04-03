@@ -4,6 +4,9 @@ const Attendance = require('../models/Attendance');
 const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const Section = require('../models/Section');
+const AuditLog = require('../models/AuditLog');
+const PushSubscription = require('../models/PushSubscription');
+const webpush = require('web-push');
 
 // Session Management
 router.post('/start-session', async (req, res) => {
@@ -140,7 +143,6 @@ router.put(['/finalize', '/push-to-admin'], async (req, res) => {
 });
 
 // Delete attendance record
-const AuditLog = require('../models/AuditLog');
 
 // Update specific student attendance status (admin)
 router.put('/update-status', async (req, res) => {
@@ -285,7 +287,6 @@ router.get('/report/:sectionId', async (req, res) => {
 });
 
 // NEW: Faculty Daily Face Attendance
-const FacultyAttendance = require('../models/AuditLog'); // We'll log it as an audit event or separate model. For now, AuditLog is good.
 
 router.post('/faculty-daily', async (req, res) => {
     try {
@@ -332,8 +333,6 @@ router.post('/faculty-daily', async (req, res) => {
 });
 
 // NEW: Admin Release Notification for Section
-const PushSubscription = require('../models/PushSubscription');
-const webpush = require('web-push');
 
 router.post('/release-section', async (req, res) => {
     try {
