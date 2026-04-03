@@ -183,8 +183,21 @@ router.post('/login', async (req, res) => {
     if (!user) return res.status(400).json({ message: 'No such user found!' });
     if (user.pass !== pass) return res.status(400).json({ message: 'Incorrect password!' });
     
-    // Note: IP tracking disabled for persistent login (Instagram-like behavior)
-    // User stays logged in across devices/sessions
+    // Check device/ip lock - Only block if trying to login from a DIFFERENT device
+    const currentIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // Admin can always bypass lock for themselves
+    if (type !== 'admin') {
+      if (!user.registeredIP) {
+        // First login - capture IP and lock it
+        user.registeredIP = currentIP;
+        await user.save();
+      } else if (user.registeredIP !== currentIP) {
+        return res.status(403).json({ 
+          message: `Security Lock: This account is restricted to your registered device only. Please contact Administrator for Device Reset.` 
+        });
+      }
+    }
 
     // Add virtual type for frontend consistency
     const userData = user.toObject();
