@@ -620,6 +620,22 @@
             window.location.href = window.location.href.replace(':5500', ':5000');
         }
 
+        // --- INSTAGRAM-LIKE AUTO LOGIN ---
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                // Auto-redirect to dashboard based on user type
+                if (user.type === 'admin') window.location.href = 'admin.html';
+                else if (user.type === 'student') window.location.href = 'student-dashboard.html';
+                else if (user.type === 'cr') window.location.href = 'student-dashboard.html';
+                else if (user.type === 'faculty') window.location.href = 'faculty-dashboard.html';
+                else window.location.href = 'index.html';
+            } catch (e) {
+                localStorage.removeItem('currentUser');
+            }
+        }
+
         const API_BASE = '/api/auth';
         const loginTab = document.getElementById('loginTab');
         const registerTab = document.getElementById('registerTab');
