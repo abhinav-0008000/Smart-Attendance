@@ -51,32 +51,37 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Proxy OCR requests to HuggingFace
-const API_URL = "https://api-inference.huggingface.co/models/DunnBC22/trocr-large-printed-cmc7_tesseract_MICR_ocr";
+const API_URL = "https://api-inference.huggingface.co/models/microsoft/trocr-large-printed";
 const API_TOKEN = process.env.HF_API_TOKEN;
 
 app.post('/api/ocr', upload.single('image'), async (req, res) => {
   try {
-    const imageBlob = req.file.buffer;
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
+    }
+
+    const base64Image = req.file.buffer.toString('base64');
+    const imageData = `data:${req.file.mimetype};base64,${base64Image}`;
 
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${API_TOKEN}`,
-        "Content-Type": "application/octet-stream"
+        "Content-Type": "application/json"
       },
-      body: imageBlob,
+      body: JSON.stringify({ inputs: imageData }),
     });
 
-    // Try to parse JSON, but handle empty or invalid responses
-    let result;
-    try {
-      result = await response.json();
-    } catch (jsonErr) {
-      result = { error: "Invalid or empty response from OCR API" };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OCR API Error:", errorText);
+      return res.status(response.status).json({ error: "OCR API error", details: errorText });
     }
 
+    const result = await response.json();
     res.json(result);
   } catch (err) {
+    console.error("OCR Error:", err);
     res.status(500).json({ error: "OCR failed", details: err.message });
   }
 });
