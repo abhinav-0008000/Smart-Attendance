@@ -183,10 +183,10 @@ router.post('/login', async (req, res) => {
     if (!user) return res.status(400).json({ message: 'No such user found!' });
     if (user.pass !== pass) return res.status(400).json({ message: 'Incorrect password!' });
     
-    // Check device/ip lock
+    // Check device/ip lock - Only block if trying to login from a DIFFERENT device
     const currentIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     
-    // Admin can always bypass lock for themselves (optional, but safer)
+    // Admin can always bypass lock for themselves
     if (type !== 'admin') {
       if (!user.registeredIP) {
         // First login - capture IP and lock it
@@ -194,7 +194,7 @@ router.post('/login', async (req, res) => {
         await user.save();
       } else if (user.registeredIP !== currentIP) {
         return res.status(403).json({ 
-          message: `Security Lock: This account is restricted to device [${user.registeredIP}]. Current access from [${currentIP}] is blocked. Please contact Administrator for Device Reset.` 
+          message: `Security Lock: This account is restricted to your registered device only. Please contact Administrator for Device Reset.` 
         });
       }
     }

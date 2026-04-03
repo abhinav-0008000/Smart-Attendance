@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Settings = require('../models/Settings');
 const Attendance = require('../models/Attendance');
 const Subject = require('../models/Subject');
+const AuditLog = require('../models/AuditLog');
 
 // Setup default branches (useful for initialization)
 router.post('/init', async (req, res) => {
@@ -313,8 +314,6 @@ router.put('/settings/:key', async (req, res) => {
         res.json(setting);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
-
-const AuditLog = require('../models/AuditLog');
 
 router.get('/audit-logs', async (req, res) => {
     try {

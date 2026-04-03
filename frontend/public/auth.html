@@ -83,15 +83,15 @@
         /* --- DARK MODE PALETTE --- */
         [data-theme="dark"] {
             --primary: #4cc9f0;
-            --primary-dark: #020617;
-            --primary-light: #3a0ca3;
+            --primary-dark: #1e3a5f;
+            --primary-light: #7dd3fc;
             --secondary: #f72585;
-            --secondary-dark: #b5179e;
-            --background: #020617;
-            --card: rgba(15, 23, 42, 0.85);
+            --secondary-dark: #be185d;
+            --background: #0f172a;
+            --card: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: #1e293b;
+            --border: #334155;
             --success: #4ade80;
             --danger: #fb7185;
         }
@@ -121,21 +121,22 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            border: 2px solid var(--border);
+            border: 2px solid var(--primary);
             background: var(--card);
             color: var(--primary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .theme-toggle:hover {
             transform: scale(1.1) rotate(15deg);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            border-color: var(--primary);
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.5);
+            background: var(--primary);
+            color: white;
         }
 
         /* Theme Animation Circle */
@@ -186,8 +187,12 @@
             z-index: 0;
         }
         .blob-1 { width: 500px; height: 500px; background: #1a4d8a; top: -150px; left: -100px; animation-delay: 0s; }
-        .blob-2 { width: 400px; height: 400px; background: var(--secondary); top: 60%; right: -100px; animation-delay: -4s; opacity: 0.1; }
+        .blob-2 { width: 400px; height: 400px; background: var(--secondary); top: 60%; right: -100px; animation-delay: -4s; opacity: 0.15; }
         .blob-3 { width: 300px; height: 300px; background: #0066cc; bottom: -100px; left: 30%; animation-delay: -8s; }
+
+        [data-theme="dark"] .blob-1 { background: #1e3a5f; opacity: 0.4; }
+        [data-theme="dark"] .blob-2 { background: #f72585; opacity: 0.2; }
+        [data-theme="dark"] .blob-3 { background: #0ea5e9; opacity: 0.3; }
 
         @keyframes blobFloat {
             0%, 100% { transform: translate(0, 0) scale(1); }
@@ -222,12 +227,11 @@
             background: var(--card);
             border-radius: 28px;
             padding: 44px 40px;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border);
             position: relative;
             overflow: hidden;
             border: 1px solid var(--border);
-            transition: background var(--transition), border var(--transition);
+            transition: background var(--transition), border var(--transition), box-shadow var(--transition);
         }
 
         /* Shimmering top border */
@@ -614,6 +618,22 @@
         if (window.location.port === '5500') {
             console.warn('Redirecting from Live Server (5500) to Backend Port (5000)...');
             window.location.href = window.location.href.replace(':5500', ':5000');
+        }
+
+        // --- INSTAGRAM-LIKE AUTO LOGIN ---
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                // Auto-redirect to dashboard based on user type
+                if (user.type === 'admin') window.location.href = 'admin.html';
+                else if (user.type === 'student') window.location.href = 'student-dashboard.html';
+                else if (user.type === 'cr') window.location.href = 'student-dashboard.html';
+                else if (user.type === 'faculty') window.location.href = 'faculty-dashboard.html';
+                else window.location.href = 'index.html';
+            } catch (e) {
+                localStorage.removeItem('currentUser');
+            }
         }
 
         const API_BASE = '/api/auth';
