@@ -801,7 +801,7 @@
 
     async function openCam(enrollMode = false) {
       const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-      if (!isSecure) { showToast('HTTPS required for camera access', 'error'); return; }
+      if (!isSecure) { showToast('Please use HTTPS or localhost for camera access', 'error'); return; }
       if (!navigator.mediaDevices?.getUserMedia) { showToast('Camera not supported on this browser', 'error'); return; }
 
       isEnrollmentMode = enrollMode;
@@ -817,8 +817,15 @@
         document.getElementById('webcam').srcObject = stream;
         startDetection();
       } catch (err) {
-        if (err.name === 'NotAllowedError') showToast('Camera permission denied', 'error');
-        else showToast('Camera error: ' + err.message, 'error');
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          showToast('Camera blocked! Allow camera in browser settings and reload', 'error');
+        } else if (err.name === 'NotFoundError') {
+          showToast('No camera found on this device', 'error');
+        } else if (err.name === 'NotReadableError') {
+          showToast('Camera in use by another app', 'error');
+        } else {
+          showToast('Camera error: ' + err.message, 'error');
+        }
         closeCam();
       }
     }
@@ -905,11 +912,17 @@
     };
 
     document.getElementById('captureBtn').onclick = async () => {
-      let lat, lng;
+      let lat, lng, geoError = null;
       try {
         const p = await new Promise((res,rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000, enableHighAccuracy: true }));
         lat = p.coords.latitude; lng = p.coords.longitude;
-      } catch(e) { console.warn('Geolocation failed:', e.message); }
+      } catch(e) { 
+        geoError = e;
+        console.warn('Geolocation failed:', e.message);
+        if (e.code === 1) showToast('Location denied - Please enable location in browser settings', 'error');
+        else if (e.code === 2) showToast('Location unavailable - Check GPS or network', 'error');
+        else if (e.code === 3) showToast('Location timeout - Try again', 'error');
+      }
 
       const res = await fetch(`${API_URL}/auth/${isEnrollmentMode?'enroll-face':'mark-attendance-face'}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
